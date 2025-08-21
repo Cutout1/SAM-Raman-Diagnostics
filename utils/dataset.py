@@ -78,8 +78,6 @@ class SAMRaman:
             defaultdict(list),
         )
         
-        print(self.use_pre_split)
-        
         if self.use_pre_split:
             # use existing test/train split passed in by the user
             for train_data_path, train_labels_path, test_data_path, test_labels_path in zip(
@@ -147,7 +145,6 @@ class SAMRaman:
         print("train_set length: " + str(len(train_set["labels"])))
         print("val_set length: " + str(len(val_set["labels"])))
         print("test_set length: " + str(len(test_set["labels"])))
-        print(train_set["labels"])
         return train_set, val_set, test_set
 
     def _create_dataloaders(self):

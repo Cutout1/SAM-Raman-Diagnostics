@@ -201,8 +201,14 @@ def run_model_training_and_evaluation():
     print(f"Using device: {device}")
 
     config = parse_args()
-    print("spectra_dirs: " + str(config["spectra_dirs"]))
-    print("label_dirs: " + str(config["label_dirs"]))
+    if config["use_pre_split"]:
+        print("train_data_path: " + str(config["train_data_path"]))
+        print("train_labels_path: " + str(config["train_labels_path"]))
+        print("test_data_path: " + str(config["test_data_path"]))
+        print("test_labels_path: " + str(config["test_labels_path"]))
+    else:
+        print("spectra_dirs: " + str(config["spectra_dirs"]))
+        print("label_dirs: " + str(config["label_dirs"]))
     set_all_seeds(config["seed"])
 
     experiment_dir = Path(config["output_dir"]) / config["experiment_name"]
