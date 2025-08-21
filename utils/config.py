@@ -18,6 +18,11 @@ class Config:
         ]
     )
     spectra_intervals: List[int] = field(default_factory=lambda: [400, 100])
+    use_pre_split: bool = False
+    train_data_path: List[str] = ""
+    train_labels_path: List[str] = ""
+    test_data_path: List[str] = ""
+    test_labels_path: List[str] = ""
 
     # training params
     batch_size: int = 16

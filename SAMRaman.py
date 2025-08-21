@@ -36,6 +36,35 @@ def parse_args():
         help=f"Specified patient intervals for clinical significance. Default: {config.spectra_intervals}",
     )
     parser.add_argument(
+        "--use_pre_split",
+        type=bool,
+        help=f"True if you want to use an existing train/test split, False otherwise. Default: {config.use_pre_split}",
+    )
+    parser.add_argument(
+        "--train_data_path",
+        nargs="+",
+        type=str,
+        help=f"Path to an npy file containing the train set data, to directly pass in pre-split train/test data.",
+    )
+    parser.add_argument(
+        "--train_labels_path",
+        nargs="+",
+        type=str,
+        help=f"Path to an npy file containing the train set labels, to directly pass in pre-split train/test data.",
+    )
+    parser.add_argument(
+        "--test_data_path",
+        nargs="+",
+        type=str,
+        help=f"Path to an npy file containing the test set data, to directly pass in pre-split train/test data.",
+    )
+    parser.add_argument(
+        "--test_labels_path",
+        nargs="+",
+        type=str,
+        help=f"Path to an npy file containing the test set labels, to directly pass in pre-split train/test data.",
+    )
+    parser.add_argument(
         "--batch_size",
         type=int,
         help=f"Batch size for the training and validation loops. Default: {config.batch_size}",
@@ -172,6 +201,8 @@ def run_model_training_and_evaluation():
     print(f"Using device: {device}")
 
     config = parse_args()
+    print("spectra_dirs: " + str(config["spectra_dirs"]))
+    print("label_dirs: " + str(config["label_dirs"]))
     set_all_seeds(config["seed"])
 
     experiment_dir = Path(config["output_dir"]) / config["experiment_name"]
@@ -182,6 +213,11 @@ def run_model_training_and_evaluation():
     dataset = SAMRaman(
         spectral_dirs=config["spectra_dirs"],
         label_dirs=config["label_dirs"],
+        use_pre_split= config["use_pre_split"],
+        train_data_path= config["train_data_path"],
+        train_labels_path= config["train_labels_path"],
+        test_data_path= config["test_data_path"],
+        test_labels_path= config["test_labels_path"],
         patient_intervals=config["spectra_intervals"],
         batch_size=config["batch_size"],
         seed=config["seed"],
