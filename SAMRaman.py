@@ -53,6 +53,18 @@ def parse_args():
         help=f"Path to an npy file containing the train set labels, to directly pass in pre-split train/test data.",
     )
     parser.add_argument(
+        "--val_data_path",
+        nargs="+",
+        type=str,
+        help=f"Path to an npy file containing the val set data, to directly pass in pre-split train/test data.",
+    )
+    parser.add_argument(
+        "--val_labels_path",
+        nargs="+",
+        type=str,
+        help=f"Path to an npy file containing the val set labels, to directly pass in pre-split train/test data.",
+    )
+    parser.add_argument(
         "--test_data_path",
         nargs="+",
         type=str,
@@ -87,7 +99,7 @@ def parse_args():
     parser.add_argument(
         "--model",
         type=str,
-        choices=["resnet1d"],
+        choices=["resnet1d", "conf_cnn", "covid_cnn"],
         help=f"Model architecture to be used for training. Default: {config.model}",
     )
     parser.add_argument(
@@ -129,7 +141,7 @@ def parse_args():
     parser.add_argument(
         "--optimizer",
         type=str,
-        choices=["sam", "asam", "adam", "sgd"],
+        choices=["sam", "asam", "adam", "sgd", "friendlysam", "fishersam"],
         help=f"Optimizer to use for training. Default: {config.optimizer}",
     )
     parser.add_argument(
@@ -137,6 +149,26 @@ def parse_args():
         type=str,
         choices=["adam", "sgd"],
         help=f"Base optimizer for SAM/ASAM. Default: {config.base_optimizer}",
+    )
+    parser.add_argument(
+        "--keep_ratio",
+        type=float,
+        help=f"Keep ratio for FisherSAM (fraction of params to mask). Default: {config.keep_ratio}",
+    )
+    parser.add_argument(
+        "--mask_update_freq",
+        type=int,
+        help=f"Mask update frequency for FisherSAM (iterations). Default: {config.mask_update_freq}",
+    )
+    parser.add_argument(
+        "--sigma",
+        type=float,
+        help=f"Sigma parameter for FriendlySAM. Default: {config.sigma}",
+    )
+    parser.add_argument(
+        "--lmbda",
+        type=float,
+        help=f"Lambda parameter for FriendlySAM. Default: {config.lmbda}",
     )
     parser.add_argument(
         "--rho",
@@ -224,6 +256,8 @@ def run_model_training_and_evaluation():
         train_labels_path= config["train_labels_path"],
         test_data_path= config["test_data_path"],
         test_labels_path= config["test_labels_path"],
+        val_data_path= config["val_data_path"],
+        val_labels_path= config["val_labels_path"],
         patient_intervals=config["spectra_intervals"],
         batch_size=config["batch_size"],
         seed=config["seed"],
@@ -250,10 +284,14 @@ def run_model_training_and_evaluation():
         base_optimizer_name=config["base_optimizer"],
         rho=config["rho"],
         weight_decay=config["weight_decay"],
+        sigma=config["sigma"],
+        lmbda=config["lmbda"],
+        keep_ratio=config["keep_ratio"],
+        mask_update_freq=config["mask_update_freq"],
     )
     sched_optimizer = (
         optimizer.base_optimizer
-        if config["optimizer"] in ["sam", "asam"]
+        if config["optimizer"] in ["sam", "asam", "friendlysam", "fishersam"]
         else optimizer
     )
     scheduler = get_scheduler(
@@ -281,10 +319,12 @@ def run_model_training_and_evaluation():
 
     test_dir = experiment_dir / "inference"
     test_dir.mkdir(parents=True, exist_ok=True)
-
-    test_accuracy = evaluate(model=model, dataloader=dataset.test_loader, device=device)
+    
+    test_accuracy, predictions, targets = evaluate(model=model, dataloader=dataset.test_loader, device=device)
 
     print(f"test results -  test_acc: {test_accuracy}")
+    print("test results - predictions:")
+    print(predictions)
 
     results = {"test_acc": test_accuracy}
     save_json(test_dir / "test_results.json", results)

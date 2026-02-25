@@ -23,6 +23,8 @@ class Config:
     train_labels_path: List[str] = ""
     test_data_path: List[str] = ""
     test_labels_path: List[str] = ""
+    val_data_path: List[str] = ""
+    val_labels_path: List[str] = ""
 
     # training params
     batch_size: int = 16
@@ -47,6 +49,12 @@ class Config:
     momentum: float = 0.9
     weight_decay: float = 0.0005
     label_smoothing: float = 0.1
+    # FriendlySAM specific params
+    sigma: float = 1.0
+    lmbda: float = 0.9
+    # FisherSAM specific params
+    keep_ratio: float = 0.1
+    mask_update_freq: int = 100
 
     # scheduler params
     scheduler: str = "step"

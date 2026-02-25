@@ -111,7 +111,7 @@ def train(
         else:
             current_lr = optimizer.param_groups[0]["lr"]
 
-        val_accuracy = evaluate(
+        val_accuracy, _, _ = evaluate(
             model=model, dataloader=dataset.val_loader, device=device
         )
 
